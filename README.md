@@ -13,4 +13,6 @@ Ex: python docscanner.py --image tommy.jpg
 
 
 Note: The JPEG file must be in the same directory and the PDF file will be created in the same directory
+
+
 Note: Will run on Python 3+ and OpenCV 3+
