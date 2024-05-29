@@ -6,6 +6,7 @@ import numpy as np      # Use for numerical processing
 import argparse     # Useful for parsing command line arguments
 import cv2      # Contains OpenCV functions
 import imutils      # Contains functions for resizing, rotating, and cropping images
+from pdfgeneration import create_pdf
 
 # construct the argument parser and parse the arguments for command line/terminal
 ap = argparse.ArgumentParser()
@@ -24,11 +25,10 @@ gray = cv2.GaussianBlur(gray, (5, 5), 0) # Blur to remove high frequency noise
 edged = cv2.Canny(gray, 75, 200) # Perform edge detection
 
 # Show the original image and the edge detected image
-print("STEP 1: Edge Detection")
 cv2.imshow("Image", image)
 cv2.imshow("Edged", edged)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 # Find the contours in the edged image, keeping only the
 # largest ones, and initialize the screen contour
@@ -50,11 +50,10 @@ for c in cnts:
         # (2) the document is rectangular, and thus will have four distinct edges
 
 # show the contour (outline) of the piece of paper
-print("STEP 2: Find contours of paper")
 cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
 cv2.imshow("Outline", image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 # apply the four point transform to obtain a top-down view of the original image
 warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
@@ -67,7 +66,11 @@ T = threshold_local(warped, 11, offset = 10, method = "gaussian")
 warped = (warped > T).astype("uint8") * 255
 
 # show the original and scanned images
-print("STEP 3: Apply perspective transform")
 cv2.imshow("Original", imutils.resize(orig, height = 650))
 cv2.imshow("Scanned", imutils.resize(warped, height = 650))
 cv2.waitKey(0)
+
+name = str(args)
+name = name[11:-7] # Find the name of the JPEG image
+
+create_pdf((name + ".pdf"),imutils.resize(warped, height = 650))
