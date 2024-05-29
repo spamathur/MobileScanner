@@ -53,7 +53,6 @@ for c in cnts:
 cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
 cv2.imshow("Outline", image)
 #cv2.waitKey(0)
-#cv2.destroyAllWindows()
 
 # apply the four point transform to obtain a top-down view of the original image
 warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
@@ -65,12 +64,22 @@ warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
 T = threshold_local(warped, 11, offset = 10, method = "gaussian")
 warped = (warped > T).astype("uint8") * 255
 
+scanned = imutils.resize(warped, height = 650)
+
 # show the original and scanned images
 cv2.imshow("Original", imutils.resize(orig, height = 650))
-cv2.imshow("Scanned", imutils.resize(warped, height = 650))
+cv2.imshow("Scanned", scanned)
 cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 name = str(args)
 name = name[11:-7] # Find the name of the JPEG image
 
-create_pdf((name + ".pdf"),imutils.resize(warped, height = 650))
+# Convert the image to bytes to insert into the PDF
+
+is_success, buffer = cv2.imencode(".jpg", scanned)
+# Convert numpy array to bytes
+img = buffer.tobytes()
+
+# Pass in the arguments to insert the scanned image into a PDF
+create_pdf((name + ".pdf"),img)
